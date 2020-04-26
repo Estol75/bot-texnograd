@@ -1,9 +1,7 @@
 #all import for work
-import asyncio
 import discord
 from discord.ext import commands
 import os
-import config
 
 
 client = commands.Bot(command_prefix = '!')
