@@ -1,44 +1,43 @@
+#all import for work
 import asyncio
 import discord
-from discord import utils
-import config
+from discord.ext import commands
 import os
+import config
 
-class MyClient(discord.Client):
-    async def on_ready(self):
-        print('Logged on as {0}!'.format(self.user))
-        client.loop.create_task(status_task())
-    async def on_raw_reaction_add(self, payload):
-        if payload.message_id == config.POST_ID:
-            channel = self.get_channel(payload.channel_id)
-            message = await channel.fetch_message(payload.message_id)
-            member = utils.get(message.guild.members, id=payload.user_id)
-            try:
-                emoji = str(payload.emoji)
-                role = utils.get(message.guild.roles, id=config.ROLES[emoji])
-                if(len([i for i in member.roles if i.id not in config.EXCROLES]) <= config.MAX_ROLES_PER_USER):
-                    await member.add_roles(role)
-                    print('[SUCCESS] User {0.display_name} has been granted with role {1.name}'.format(member, role))
-                else:
-                    await message.remove_reaction(payload.emoji, member)
-                    print('[ERROR] Too many roles for user {0.display_name}'.format(member))
-            except KeyError as e:
-                print('[ERROR] KeyError, no role found for ' + emoji)
-            except Exception as e:
-                print(repr(e))
-    async def on_raw_reaction_remove(self, payload):
-        channel = self.get_channel(payload.channel_id)
-        message = await channel.fetch_message(payload.message_id)
-        member = utils.get(message.guild.members, id=payload.user_id)
-        try:
-            emoji = str(payload.emoji)
-            role = utils.get(message.guild.roles, id=config.ROLES[emoji])
-            await member.remove_roles(role)
-            print('[SUCCESS] Role {1.name} has been remove for user {0.display_name}'.format(member, role))
-        except KeyError as e:
-            print('[ERROR] KeyError, no role found for ' + emoji)
-        except Exception as e:
-            print(repr(e))
+
+client = commands.Bot(command_prefix = '!')
+
+#the console write when the bot start
+@client.event
+async def on_ready():
+    print('The bot is ready to work')
+    client.loop.create_task(status_task())
+
+@client.event
+async def on_member_join(member):
+    print(f'{member}has joined a server.')
+
+@client.event
+async def on_member_remove(member):
+    print(f'The member has left the server')
+
+
+@client.command()
+async def корды(ctx):
+    await ctx.send('**Вот тебе полезные координаты:**\r\n'
+                      '```Ферма скелетов (По метро): -7844 -5753```'
+                      '```Ферма гвардов (по метро): -8000 -6435```'
+                      '```Ферма золота и яма: -7777 -6460```'
+                      '```Ферма зомби и пауков (По метро): -7430 -5895```'
+                      '```Городская ферма ифритов (В аду): -1200 -630```'
+                      '```Портал в энд (В аду): -1100 -950```'
+                      '```Портал в Техноград (В аду): -918 -750```'
+                      '```Портал в хаб Технограда: -7400 -6085```'
+                      '```Склад: -7470 -6015```')
+
+#status for bot
+@client.event
 
 async def status_task():
     while True:
@@ -49,11 +48,6 @@ async def status_task():
         await client.change_presence(activity=discord.Game('кста ты далбаеб ой'),status=discord.Status.online)
         await asyncio.sleep(3)
 
+token = os.environ.get('BOT_TOKEN')
+client.run(str(token))
 
-
-
-
-
-client = MyClient()
-
-client.run('Njk4NDk0NTY3MDA3Mzg3Njg5.XqVNgQ.3cxY53qggB49umfXWQNtNuVQ0bM')
